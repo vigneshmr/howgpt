@@ -20,16 +20,25 @@ def download_data_file(url, file_name=None):
 def parse_file(file_path):
     with open(file_path, "r") as file:
         text = file.read()
-        parse_text(text)
-        
-def parse_text(text):
+        return text_to_tokens_with_stats(text)
+
+def text_to_tokens(text):
+    words = re.split(r'([,.:;?_!"()\']|--|\s)', text)
+    tokens = [item.strip() for item in words if item.strip()]
+    return tokens
+
+def text_to_tokens_with_stats(text):
     char_count = len(text)
     print(f"Number of characters in the file: {char_count}")
-    words = re.split(r'([,.:;?_!"()\']|--|\s)', text)
-    preprocessed = [item.strip() for item in words if item.strip()]
-    print(f"Number of words: {len(preprocessed)}")
+    tokens = text_to_tokens(text)
+    print(f"Number of words: {len(tokens)}")
+    return tokens
 
-
+def build_token_ids(tokens):
+    vocab_set = sorted(set(tokens))
+    m_id_to_token = {token: i+1 for i, token in enumerate(vocab_set)}
+    return m_id_to_token
+    
 
 # ----------------------------------------------------------------
 url_1 = ("https://raw.githubusercontent.com/rasbt/"
@@ -38,6 +47,12 @@ url_1 = ("https://raw.githubusercontent.com/rasbt/"
 
 url_2 = ('https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt')
 
-parse_file(download_data_file(url_1))
-# parse_file(download_data_file(url_2, 'tinyshakespeare.txt'))
-# parse_text('Hello, world. Is this-- a test?')
+arr = parse_file(download_data_file(url_1))
+print(len(arr), ' total tokens')
+
+tokens = text_to_tokens("The quick brown fox jumps over the lazy dog")
+m_token_id_token = build_token_ids(tokens)
+
+tokens = tokens[:100]
+print('tokens: ', tokens)
+print('by token ids: ', [m_token_id_token[x] for x in tokens])
